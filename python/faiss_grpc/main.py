@@ -13,12 +13,16 @@ def main() -> None:
         max_workers=env.int("FAISS_GRPC_MAX_WORKERS", 10),
     )
     service_config = FaissServiceConfig(
-        nprobe=env.int("FAISS_GRPC_NPROBE", None),
         normalize_query=env.bool("FAISS_GRPC_NORMALIZE_QUERY", False),
     )
 
+    index_kwargs = {'nprobe': env.int("FAISS_GRPC_NPROBE", None)}
+
     server = Server(
-        env.str("FAISS_GRPC_INDEX_PATH"), server_config, service_config
+        env.str("FAISS_GRPC_INDEX_PATH"),
+        server_config,
+        service_config,
+        **index_kwargs
     )
     server.serve()
 

@@ -2,16 +2,18 @@ from concurrent import futures
 from dataclasses import dataclass
 from typing import List, Optional
 
-import faiss
 import grpc
 import numpy as np
-from faiss import Index
 
+from faiss_grpc.indexes.base import IndexWrapper
+from faiss_grpc.indexes.faiss_index import FaissIndexWrapper
 from faiss_grpc.proto.faiss_pb2 import (
     HeartbeatResponse,
     Neighbor,
     SearchByIdResponse,
     SearchResponse,
+    SearchRequest,
+    SearchByIdRequest,
 )
 from faiss_grpc.proto.faiss_pb2_grpc import (
     FaissServiceServicer,
@@ -28,24 +30,32 @@ class ServerConfig:
 
 @dataclass(eq=True, frozen=True)
 class FaissServiceConfig:
-    nprobe: Optional[int] = None
     normalize_query: bool = False
 
 
-class FaissServiceServicer(FaissServiceServicer):
-    def __init__(self, index: Index, config: FaissServiceConfig) -> None:
+@dataclass(eq=True, frozen=True)
+class AnnoyIndexConfig:
+    dim: int
+    metric: str
+
+
+@dataclass(eq=True, frozen=True)
+class FaissIndexConfig:
+    nprobe: Optional[int] = None
+
+
+class FaissIndexServicer(FaissServiceServicer):
+    def __init__(self, index: IndexWrapper, config: FaissServiceConfig) -> None:
         self.index = index
         self.config = config
-        if self.config.nprobe:
-            self.index.nprobe = self.config.nprobe
 
-    def Search(self, request, context) -> SearchResponse:
+    def Search(self, request: SearchRequest, context) -> SearchResponse:
         query = np.atleast_2d(np.array(request.query.val, dtype=np.float32))
-        if query.shape[1] != self.index.d:
+        if query.shape[1] != self.index.dimension:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             msg = (
                 'query vector dimension mismatch '
-                f'expected {self.index.d} but passed {query.shape[1]}'
+                f'expected {self.index.dimension} but passed {query.shape[1]}'
             )
             context.set_details(msg)
             return SearchResponse()
@@ -62,18 +72,18 @@ class FaissServiceServicer(FaissServiceServicer):
 
         return SearchResponse(neighbors=neighbors)
 
-    def SearchById(self, request, context) -> SearchByIdResponse:
+    def SearchById(
+        self, request: SearchByIdRequest, context
+    ) -> SearchByIdResponse:
         request_id = request.id
-        maximum_id = self.index.ntotal - 1
+        maximum_id = self.index.maximum_id
         if not (0 <= request_id <= maximum_id):
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             msg = f'request id must be 0 <= id <= {maximum_id}'
             context.set_details(msg)
             return SearchByIdResponse()
 
-        query = self.index.reconstruct_n(request_id, 1)
-
-        distances, ids = self.index.search(query, request.k + 1)
+        distances, ids = self.index.search_by_id(request_id, request.k)
 
         neighbors: List[Neighbor] = []
         for d, i in zip(distances[0], ids[0]):
@@ -96,13 +106,14 @@ class Server:
         index_path: str,
         server_config: ServerConfig,
         service_config: FaissServiceConfig,
+        **kwargs,
     ) -> None:
-        index = faiss.read_index(index_path)
+        index = FaissIndexWrapper.load_index(index_path, **kwargs)
         self.server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=server_config.max_workers)
         )
         add_FaissServiceServicer_to_server(
-            FaissServiceServicer(index, service_config), self.server
+            FaissIndexServicer(index, service_config), self.server
         )
         self.server.add_insecure_port(
             f'{server_config.host}:{server_config.port}'

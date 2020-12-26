@@ -16,10 +16,11 @@ from grpc_testing._server._server import _Server
 
 from faiss_grpc.faiss_server import (
     FaissServiceConfig,
-    FaissServiceServicer,
+    FaissIndexServicer,
     Server,
     ServerConfig,
 )
+from faiss_grpc.indexes.faiss_index import FaissIndexWrapper
 from faiss_grpc.proto import faiss_pb2, faiss_pb2_grpc
 from faiss_grpc.proto.faiss_pb2 import (
     HeartbeatResponse,
@@ -101,23 +102,26 @@ class TestFaissServiceServicer(BaseTestCase):
     SERVICE: Any
     SERVER: _Server
     SERVER_NORM: _Server
+    INDEX_KWARGS: dict
 
     @classmethod
     def setUpClass(cls) -> None:
         nprobe = 10
-        cls.CONFIG = FaissServiceConfig(nprobe=nprobe, normalize_query=False)
-        cls.CONFIG_NORM = FaissServiceConfig(
-            nprobe=nprobe, normalize_query=True
-        )
+        cls.CONFIG = FaissServiceConfig(normalize_query=False)
+        cls.CONFIG_NORM = FaissServiceConfig(normalize_query=True)
         cls.FAISS_CONFIG = FaissConfig(dim=64, db_size=100000, nlist=100)
+        cls.INDEX_KWARGS = {'nprobe': nprobe}
         cls.INDEX = cls.create_index()
         cls.SERVICE = faiss_pb2.DESCRIPTOR.services_by_name['FaissService']
         # faiss index must be cloned, because index attribute will be changed
         # FaissServiceServicer constructor (e.g. nprobe)
         cls.SERVER = grpc_testing.server_from_dictionary(
             {
-                cls.SERVICE: FaissServiceServicer(
-                    faiss.clone_index(cls.INDEX), cls.CONFIG
+                cls.SERVICE: FaissIndexServicer(
+                    FaissIndexWrapper.from_index(
+                        faiss.clone_index(cls.INDEX), **cls.INDEX_KWARGS
+                    ),
+                    cls.CONFIG,
                 )
             },
             grpc_testing.strict_real_time(),
@@ -125,8 +129,11 @@ class TestFaissServiceServicer(BaseTestCase):
         # server for normalize_query is True
         cls.SERVER_NORM = grpc_testing.server_from_dictionary(
             {
-                cls.SERVICE: FaissServiceServicer(
-                    faiss.clone_index(cls.INDEX), cls.CONFIG_NORM
+                cls.SERVICE: FaissIndexServicer(
+                    FaissIndexWrapper.from_index(
+                        faiss.clone_index(cls.INDEX), **cls.INDEX_KWARGS
+                    ),
+                    cls.CONFIG_NORM,
                 )
             },
             grpc_testing.strict_real_time(),
@@ -191,9 +198,7 @@ class TestFaissServiceServicer(BaseTestCase):
         index = faiss.clone_index(self.INDEX)
         index.nprobe = 1
         distances, ids = index.search(np.atleast_2d(val), k)
-        unexpected = SearchResponse(
-            neighbors=self.to_neighbors(distances, ids)
-        )
+        unexpected = SearchResponse(neighbors=self.to_neighbors(distances, ids))
 
         response, _, code, _ = rpc.termination()
 
@@ -327,13 +332,15 @@ class TestServer(BaseTestCase):
     SERVICE_CONFIG: FaissServiceConfig
     CLIENT: GrpcClientForTesting
     SERVER: Server
+    INDEX_KWARGS: dict
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.SERVER_CONFIG = ServerConfig()
-        cls.SERVICE_CONFIG = FaissServiceConfig(nprobe=10)
+        cls.SERVICE_CONFIG = FaissServiceConfig()
         cls.FAISS_CONFIG = FaissConfig(dim=64, db_size=100000, nlist=100)
         cls.CLIENT = GrpcClientForTesting()
+        cls.INDEX_KWARGS = {'nprobe': 10}
 
         index = cls.create_index()
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -343,6 +350,7 @@ class TestServer(BaseTestCase):
                 index_path=index_path,
                 server_config=cls.SERVER_CONFIG,
                 service_config=cls.SERVICE_CONFIG,
+                kwargs=cls.INDEX_KWARGS,
             )
 
         cls.SERVER.server.start()
