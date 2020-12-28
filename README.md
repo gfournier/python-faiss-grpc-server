@@ -89,6 +89,28 @@ import faiss_pb2 as faiss__pb2
 import faiss_grpc.proto.faiss_pb2 as faiss__pb2
 ```
 
+### Generate proto documentation
+
+Install protobuf.
+
+Install go and add go binaries directory to PATH:
+```sh
+echo 'export GOPATH=$HOME/Go' >> $HOME/.bashrc
+echo 'export PATH=$PATH:$GOPATH/bin' >> $HOME/.bashrc
+source $HOME/.bashrc
+```
+
+Install protocol buffer tool to generate documentation (`protoc-gen-doc`):
+```sh
+go get -u github.com/pseudomuto/protoc-gen-doc/cmd/protoc-gen-doc
+```
+
+Generate documentation
+```sh
+make documents
+```
+
+
 ## Cautionary points
 
 - Avoid to use SearchById on the index built by add_with_ids (can use from IndexIDMap, IndexIVF etc.). These index does not keep id complicatedly so reconstruct_n method may do unexpected behavior.
