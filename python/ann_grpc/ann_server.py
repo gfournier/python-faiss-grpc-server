@@ -5,9 +5,9 @@ from typing import List, Optional
 import grpc
 import numpy as np
 
-from faiss_grpc.indexes.base import IndexWrapper
-from faiss_grpc.indexes.faiss_index import FaissIndexWrapper
-from faiss_grpc.proto.faiss_pb2 import (
+from ann_grpc.indexes.base import IndexWrapper
+from ann_grpc.indexes.faiss_index import FaissIndexWrapper
+from ann_grpc.proto.ann_pb2 import (
     HeartbeatResponse,
     Neighbor,
     SearchByIdResponse,
@@ -15,9 +15,9 @@ from faiss_grpc.proto.faiss_pb2 import (
     SearchRequest,
     SearchByIdRequest,
 )
-from faiss_grpc.proto.faiss_pb2_grpc import (
-    FaissServiceServicer,
-    add_FaissServiceServicer_to_server,
+from ann_grpc.proto.ann_pb2_grpc import (
+    AnnServiceServicer,
+    add_AnnServiceServicer_to_server,
 )
 
 
@@ -29,7 +29,7 @@ class ServerConfig:
 
 
 @dataclass(eq=True, frozen=True)
-class FaissServiceConfig:
+class AnnServiceConfig:
     normalize_query: bool = False
 
 
@@ -44,12 +44,12 @@ class FaissIndexConfig:
     nprobe: Optional[int] = None
 
 
-class FaissIndexServicer(FaissServiceServicer):
-    def __init__(self, index: IndexWrapper, config: FaissServiceConfig) -> None:
+class AnnServiceServicerImpl(AnnServiceServicer):
+    def __init__(self, index: IndexWrapper, config: AnnServiceConfig) -> None:
         self.index = index
         self.config = config
 
-    def Search(self, request: SearchRequest, context) -> SearchResponse:
+    def search(self, request: SearchRequest, context) -> SearchResponse:
         query = request.query.val
         if len(query) != self.index.dimension:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
@@ -72,7 +72,7 @@ class FaissIndexServicer(FaissServiceServicer):
 
         return SearchResponse(neighbors=neighbors)
 
-    def SearchById(
+    def search_by_id(
         self, request: SearchByIdRequest, context
     ) -> SearchByIdResponse:
         request_id = request.id
@@ -92,7 +92,7 @@ class FaissIndexServicer(FaissServiceServicer):
 
         return SearchByIdResponse(request_id=request_id, neighbors=neighbors)
 
-    def Heartbeat(self, request, context) -> HeartbeatResponse:
+    def heartbeat(self, request, context) -> HeartbeatResponse:
         return HeartbeatResponse(message='OK')
 
     @staticmethod
@@ -105,15 +105,15 @@ class Server:
         self,
         index_path: str,
         server_config: ServerConfig,
-        service_config: FaissServiceConfig,
+        service_config: AnnServiceConfig,
         **kwargs,
     ) -> None:
         index = FaissIndexWrapper.load_index(index_path, **kwargs)
         self.server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=server_config.max_workers)
         )
-        add_FaissServiceServicer_to_server(
-            FaissIndexServicer(index, service_config), self.server
+        add_AnnServiceServicer_to_server(
+            AnnServiceServicerImpl(index, service_config), self.server
         )
         self.server.add_insecure_port(
             f'{server_config.host}:{server_config.port}'

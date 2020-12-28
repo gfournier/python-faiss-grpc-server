@@ -3,29 +3,29 @@
 
 ## Table of Contents
 
-- [proto/faiss.proto](#proto/faiss.proto)
-    - [HeartbeatResponse](#faiss.HeartbeatResponse)
-    - [Neighbor](#faiss.Neighbor)
-    - [SearchByIdRequest](#faiss.SearchByIdRequest)
-    - [SearchByIdResponse](#faiss.SearchByIdResponse)
-    - [SearchRequest](#faiss.SearchRequest)
-    - [SearchResponse](#faiss.SearchResponse)
-    - [Vector](#faiss.Vector)
+- [proto/ann.proto](#proto/ann.proto)
+    - [HeartbeatResponse](#ann.HeartbeatResponse)
+    - [Neighbor](#ann.Neighbor)
+    - [SearchByIdRequest](#ann.SearchByIdRequest)
+    - [SearchByIdResponse](#ann.SearchByIdResponse)
+    - [SearchRequest](#ann.SearchRequest)
+    - [SearchResponse](#ann.SearchResponse)
+    - [Vector](#ann.Vector)
   
-    - [FaissService](#faiss.FaissService)
+    - [AnnService](#ann.AnnService)
   
 - [Scalar Value Types](#scalar-value-types)
 
 
 
-<a name="proto/faiss.proto"></a>
+<a name="proto/ann.proto"></a>
 <p align="right"><a href="#top">Top</a></p>
 
-## proto/faiss.proto
+## proto/ann.proto
 Messages for Faiss searching services.
 
 
-<a name="faiss.HeartbeatResponse"></a>
+<a name="ann.HeartbeatResponse"></a>
 
 ### HeartbeatResponse
 Response of heartbeat.
@@ -40,7 +40,7 @@ Response of heartbeat.
 
 
 
-<a name="faiss.Neighbor"></a>
+<a name="ann.Neighbor"></a>
 
 ### Neighbor
 Single instance of Faiss searching results.
@@ -56,7 +56,7 @@ Single instance of Faiss searching results.
 
 
 
-<a name="faiss.SearchByIdRequest"></a>
+<a name="ann.SearchByIdRequest"></a>
 
 ### SearchByIdRequest
 Request for searching by ID.
@@ -72,7 +72,7 @@ Request for searching by ID.
 
 
 
-<a name="faiss.SearchByIdResponse"></a>
+<a name="ann.SearchByIdResponse"></a>
 
 ### SearchByIdResponse
 Response of searching by ID.
@@ -81,14 +81,14 @@ Response of searching by ID.
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
 | request_id | [uint64](#uint64) |  | The requested ID. |
-| neighbors | [Neighbor](#faiss.Neighbor) | repeated | Neighbors of given ID. Requested ID is excluded. |
+| neighbors | [Neighbor](#ann.Neighbor) | repeated | Neighbors of given ID. Requested ID is excluded. |
 
 
 
 
 
 
-<a name="faiss.SearchRequest"></a>
+<a name="ann.SearchRequest"></a>
 
 ### SearchRequest
 Request for searching by query vector.
@@ -96,7 +96,7 @@ Request for searching by query vector.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| query | [Vector](#faiss.Vector) |  | The query vector for searching. Dimension must be same as subscribed vectors in index. |
+| query | [Vector](#ann.Vector) |  | The query vector for searching. Dimension must be same as subscribed vectors in index. |
 | k | [uint64](#uint64) |  | How many results (neighbors) you want to get. |
 
 
@@ -104,7 +104,7 @@ Request for searching by query vector.
 
 
 
-<a name="faiss.SearchResponse"></a>
+<a name="ann.SearchResponse"></a>
 
 ### SearchResponse
 Response of searching by query vector.
@@ -112,14 +112,14 @@ Response of searching by query vector.
 
 | Field | Type | Label | Description |
 | ----- | ---- | ----- | ----------- |
-| neighbors | [Neighbor](#faiss.Neighbor) | repeated | Neighbors of given query. |
+| neighbors | [Neighbor](#ann.Neighbor) | repeated | Neighbors of given query. |
 
 
 
 
 
 
-<a name="faiss.Vector"></a>
+<a name="ann.Vector"></a>
 
 ### Vector
 Wrapper message for list of float32. This keeps compatible for vectors used on Faiss.
@@ -140,16 +140,16 @@ Wrapper message for list of float32. This keeps compatible for vectors used on F
  
 
 
-<a name="faiss.FaissService"></a>
+<a name="ann.AnnService"></a>
 
-### FaissService
+### AnnService
 
 
 | Method Name | Request Type | Response Type | Description |
 | ----------- | ------------ | ------------- | ------------|
-| Heartbeat | [.google.protobuf.Empty](#google.protobuf.Empty) | [HeartbeatResponse](#faiss.HeartbeatResponse) | Check server is working. |
-| Search | [SearchRequest](#faiss.SearchRequest) | [SearchResponse](#faiss.SearchResponse) | Search neighbors from query vector. |
-| SearchById | [SearchByIdRequest](#faiss.SearchByIdRequest) | [SearchByIdResponse](#faiss.SearchByIdResponse) | Search neighbors from ID. |
+| heartbeat | [.google.protobuf.Empty](#google.protobuf.Empty) | [HeartbeatResponse](#ann.HeartbeatResponse) | Check server is working. |
+| search | [SearchRequest](#ann.SearchRequest) | [SearchResponse](#ann.SearchResponse) | Search neighbors from query vector. |
+| search_by_id | [SearchByIdRequest](#ann.SearchByIdRequest) | [SearchByIdResponse](#ann.SearchByIdResponse) | Search neighbors from ID. |
 
  
 

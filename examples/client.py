@@ -6,8 +6,8 @@ import grpc
 import numpy as np
 from google.protobuf.empty_pb2 import Empty
 
-import faiss_pb2  # isort:skip
-import faiss_pb2_grpc  # isort:skip
+import ann_pb2  # isort:skip
+import ann_pb2_grpc  # isort:skip
 
 VectorLike = Union[List[float], np.ndarray]
 
@@ -15,30 +15,30 @@ VectorLike = Union[List[float], np.ndarray]
 class GrpcClient:
     def __init__(self) -> None:
         channel = grpc.insecure_channel('localhost:50051')
-        self._stub = faiss_pb2_grpc.FaissServiceStub(channel)
+        self._stub = ann_pb2_grpc.AnnServiceStub(channel)
 
     @property
-    def stub(self) -> faiss_pb2_grpc.FaissServiceStub:
+    def stub(self) -> ann_pb2_grpc.AnnServiceStub:
         return self._stub
 
     def search(self, query: VectorLike, k: int) -> None:
-        vec = faiss_pb2.Vector(val=query)
-        req = faiss_pb2.SearchRequest(query=vec, k=k)
-        res = self.stub.Search(req)
+        vec = ann_pb2.Vector(val=query)
+        req = ann_pb2.SearchRequest(query=vec, k=k)
+        res = self.stub.search(req)
 
         for i, n in enumerate(res.neighbors):
             print(f'#{i}, id: {n.id}, score: {n.score}')
 
     def search_by_id(self, request_id: int, k: int) -> None:
-        req = faiss_pb2.SearchByIdRequest(id=request_id, k=k)
-        res = self.stub.SearchById(req)
+        req = ann_pb2.SearchByIdRequest(id=request_id, k=k)
+        res = self.stub.search_by_id(req)
 
         print(f'requested id {res.request_id}')
         for i, n in enumerate(res.neighbors):
             print(f'#{i}, id: {n.id}, score: {n.score}')
 
     def heartbeat(self) -> None:
-        res = self.stub.Heartbeat(Empty())
+        res = self.stub.heartbeat(Empty())
         print(f'message {res.message}')
 
 

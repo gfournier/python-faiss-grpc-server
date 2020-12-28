@@ -3,7 +3,7 @@ from typing import Tuple
 from annoy import AnnoyIndex
 import numpy as np
 
-from faiss_grpc.indexes.base import IndexWrapper
+from ann_grpc.indexes.base import IndexWrapper
 
 
 class AnnoyIndexWrapper(IndexWrapper):

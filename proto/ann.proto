@@ -1,7 +1,7 @@
 // Messages for Faiss searching services.
 syntax = "proto3";
 
-package faiss;
+package ann;
 
 import "google/protobuf/empty.proto";
 
@@ -55,11 +55,11 @@ message HeartbeatResponse {
     string message = 1;
 }
 
-service FaissService {
+service AnnService {
     // Check server is working.
-    rpc Heartbeat (google.protobuf.Empty) returns (HeartbeatResponse);
+    rpc heartbeat(google.protobuf.Empty) returns (HeartbeatResponse);
     // Search neighbors from query vector.
-    rpc Search(SearchRequest) returns (SearchResponse);
+    rpc search(SearchRequest) returns (SearchResponse);
     // Search neighbors from ID.
-    rpc SearchById(SearchByIdRequest) returns (SearchByIdResponse);
+    rpc search_by_id(SearchByIdRequest) returns (SearchByIdResponse);
 }

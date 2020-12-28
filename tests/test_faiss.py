@@ -5,8 +5,8 @@ import pytest
 
 from google.protobuf.empty_pb2 import Empty
 
-from faiss_grpc.indexes.faiss_index import FaissIndexWrapper
-from faiss_grpc.proto.faiss_pb2 import HeartbeatResponse, Vector, SearchRequest, SearchByIdRequest
+from ann_grpc.indexes.faiss_index import FaissIndexWrapper
+from ann_grpc.proto.ann_pb2 import HeartbeatResponse, Vector, SearchRequest, SearchByIdRequest
 from tests.util import create_faiss_index
 
 
@@ -19,7 +19,7 @@ def index():
 
 
 def test_successful_heartbeat(grpc_stub):
-    response = grpc_stub.Heartbeat(Empty())
+    response = grpc_stub.heartbeat(Empty())
     assert isinstance(response, HeartbeatResponse)
     assert response.message == "OK"
 
@@ -34,7 +34,7 @@ def test_successful_search(grpc_sub_and_index):
     val = np.ones(index.dimension, dtype=np.float32)
     vector = Vector(val=val)
     request = SearchRequest(query=vector, k=k)
-    response = grpc_stub.Search(request)
+    response = grpc_stub.search(request)
     expected_distances, expected_ids = index.search(val, k)
     distances, ids = zip(*list(map(lambda x: (x.score, x.id), response.neighbors)))
     assert np.array_equal(expected_ids, ids)
@@ -48,7 +48,7 @@ def test_failed_different_nprobe_search(grpc_sub_and_index):
     val = np.ones(index.dimension, dtype=np.float32)
     vector = Vector(val=val)
     request = SearchRequest(query=vector, k=k)
-    response = grpc_stub.Search(request)
+    response = grpc_stub.search(request)
 
     index.index = faiss.clone_index(index.index)
     index.index.nprobe = 1
@@ -68,7 +68,7 @@ def test_failed_illegal_query_dimension_search(grpc_sub_and_index):
     vector = Vector(val=val)
     request = SearchRequest(query=vector, k=k)
     try:
-        grpc_stub.Search(request)
+        grpc_stub.search(request)
         raise Exception("Search request should have failed.")
     except grpc.RpcError as e:
         assert e.details()\
@@ -81,7 +81,7 @@ def test_successful_search_by_id(grpc_sub_and_index):
     request_id = 42
     k = 1000
     request = SearchByIdRequest(id=request_id, k=k)
-    response = grpc_stub.SearchById(request)
+    response = grpc_stub.search_by_id(request)
 
     query = index.index.reconstruct_n(request_id, 1)
     expected_distances, expected_ids = index.search(query, k + 1)
@@ -97,7 +97,7 @@ def test_failed_unknown_id_search_by_id(grpc_sub_and_index):
     k = 1000
     request = SearchByIdRequest(id=request_id, k=k)
     try:
-        grpc_stub.SearchById(request)
+        grpc_stub.search_by_id(request)
         raise Exception("Search request should have failed.")
     except grpc.RpcError as e:
         assert e.details() == f"request id must be 0 <= id <= {index.maximum_id}"

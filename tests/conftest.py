@@ -1,28 +1,28 @@
 import pytest
 
-from faiss_grpc.faiss_server import FaissServiceConfig, FaissIndexServicer
-from faiss_grpc.proto.faiss_pb2_grpc import add_FaissServiceServicer_to_server, FaissServiceStub
+from ann_grpc.ann_server import AnnServiceConfig, AnnServiceServicerImpl
+from ann_grpc.proto.ann_pb2_grpc import add_AnnServiceServicer_to_server, AnnServiceStub
 
 
 @pytest.fixture(scope='module')
 def config():
-    config = FaissServiceConfig(normalize_query=False)
+    config = AnnServiceConfig(normalize_query=False)
     return config
 
 
 @pytest.fixture(scope='module')
 def grpc_add_to_server():
-    return add_FaissServiceServicer_to_server
+    return add_AnnServiceServicer_to_server
 
 
 @pytest.fixture(scope='module')
 def grpc_servicer(index, config):
-    return FaissIndexServicer(index, config)
+    return AnnServiceServicerImpl(index, config)
 
 
 @pytest.fixture(scope='module')
 def grpc_stub_cls(grpc_channel):
-    return FaissServiceStub
+    return AnnServiceStub
 
 
 @pytest.fixture(scope='module')

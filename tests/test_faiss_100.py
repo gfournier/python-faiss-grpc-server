@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
 
-from faiss_grpc.indexes.faiss_index import FaissIndexWrapper
-from faiss_grpc.proto.faiss_pb2 import Vector, SearchRequest
+from ann_grpc.indexes.faiss_index import FaissIndexWrapper
+from ann_grpc.proto.ann_pb2 import Vector, SearchRequest
 from tests.util import create_faiss_index
 
 
@@ -24,7 +24,7 @@ def test_successful_search(grpc_sub_and_index):
     val = np.ones(index.dimension, dtype=np.float32)
     vector = Vector(val=val)
     request = SearchRequest(query=vector, k=k)
-    response = grpc_stub.Search(request)
+    response = grpc_stub.search(request)
     expected_distances, expected_ids = index.search(val, k)
     distances, ids = zip(*list(map(lambda x: (x.score, x.id), response.neighbors)))
     assert np.array_equal(expected_ids, ids)

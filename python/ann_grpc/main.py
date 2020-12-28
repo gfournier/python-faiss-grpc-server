@@ -1,6 +1,6 @@
 from environs import Env
 
-from faiss_grpc.faiss_server import FaissServiceConfig, Server, ServerConfig
+from ann_grpc.ann_server import AnnServiceConfig, Server, ServerConfig
 
 env = Env()
 env.read_env()
@@ -12,7 +12,7 @@ def main() -> None:
         port=env.int("FAISS_GRPC_PORT", 50051),
         max_workers=env.int("FAISS_GRPC_MAX_WORKERS", 10),
     )
-    service_config = FaissServiceConfig(
+    service_config = AnnServiceConfig(
         normalize_query=env.bool("FAISS_GRPC_NORMALIZE_QUERY", False),
     )
 
