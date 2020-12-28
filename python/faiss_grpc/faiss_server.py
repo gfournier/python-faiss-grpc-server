@@ -50,12 +50,12 @@ class FaissIndexServicer(FaissServiceServicer):
         self.config = config
 
     def Search(self, request: SearchRequest, context) -> SearchResponse:
-        query = np.atleast_2d(np.array(request.query.val, dtype=np.float32))
-        if query.shape[1] != self.index.dimension:
+        query = request.query.val
+        if len(query) != self.index.dimension:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             msg = (
                 'query vector dimension mismatch '
-                f'expected {self.index.dimension} but passed {query.shape[1]}'
+                f'expected {self.index.dimension} but passed {len(query)}'
             )
             context.set_details(msg)
             return SearchResponse()
@@ -66,7 +66,7 @@ class FaissIndexServicer(FaissServiceServicer):
         distances, ids = self.index.search(query, request.k)
 
         neighbors: List[Neighbor] = []
-        for d, i in zip(distances[0], ids[0]):
+        for d, i in zip(distances, ids):
             if i != -1:
                 neighbors.append(Neighbor(id=i, score=d))
 
@@ -86,7 +86,7 @@ class FaissIndexServicer(FaissServiceServicer):
         distances, ids = self.index.search_by_id(request_id, request.k)
 
         neighbors: List[Neighbor] = []
-        for d, i in zip(distances[0], ids[0]):
+        for d, i in zip(distances, ids):
             if i not in [request_id, -1]:
                 neighbors.append(Neighbor(id=i, score=d))
 

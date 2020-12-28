@@ -33,12 +33,13 @@ class FaissIndexWrapper(IndexWrapper):
     def search(
         self, vector: np.ndarray, k: int
     ) -> Tuple[np.ndarray, np.ndarray]:
+        vector = np.atleast_2d(np.array(vector, dtype=np.float32))
         distances, ids = self.index.search(vector, k)
-        return distances, ids
+        return distances[0], ids[0]
 
     def search_by_id(
         self, request_id: int, k: int
     ) -> Tuple[np.ndarray, np.ndarray]:
         query = self.index.reconstruct_n(request_id, 1)
         distances, ids = self.index.search(query, k + 1)
-        return distances, ids
+        return distances[0], ids[0]
