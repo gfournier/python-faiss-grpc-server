@@ -6,7 +6,7 @@ import grpc
 import numpy as np
 
 from ann_grpc.indexes.base import IndexWrapper
-from ann_grpc.indexes.faiss_index import FaissIndexWrapper
+from ann_grpc.indexes.loader import IndexLoader
 from ann_grpc.proto.ann_pb2 import (
     HeartbeatResponse,
     Neighbor,
@@ -108,7 +108,7 @@ class Server:
         service_config: AnnServiceConfig,
         **kwargs,
     ) -> None:
-        index = FaissIndexWrapper.load_index(index_path, **kwargs)
+        index = IndexLoader().load_index(index_path, **kwargs)
         self.server = grpc.server(
             futures.ThreadPoolExecutor(max_workers=server_config.max_workers)
         )
