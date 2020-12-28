@@ -1,10 +1,14 @@
+import random
+
 import numpy as np
 
 import faiss
 from faiss import Index
 
+from annoy import AnnoyIndex
 
-def create_index(dim: int, n_samples: int, n_list: int) -> Index:
+
+def create_faiss_index(dim: int, n_samples: int, n_list: int) -> Index:
     # following code is same as sample of faiss github wiki
     #   https://github.com/facebookresearch/faiss/wiki/Getting-started
     #   https://github.com/facebookresearch/faiss/wiki/Faster-search
@@ -20,9 +24,22 @@ def create_index(dim: int, n_samples: int, n_list: int) -> Index:
     return index
 
 
+def create_annoy_index(dim, db_size, n_trees, metric):
+    # https://github.com/spotify/annoy
+    index = AnnoyIndex(dim, metric)  # Length of item vector that will be indexed
+    for i in range(db_size):
+        v = [random.gauss(0, 1) for _ in range(dim)]
+        index.add_item(i, v)
+    index.build(n_trees)
+    return index
+
+
 def run() -> None:
-    index = create_index(64, 100000, 100)
+    index = create_faiss_index(64, 100000, 100)
     faiss.write_index(index, 'index.faiss')
+
+    index = create_annoy_index(64, 100000, 10, 'euclidean')
+    index.save('index.ann')
 
 
 if __name__ == "__main__":

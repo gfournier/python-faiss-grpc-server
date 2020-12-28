@@ -8,18 +8,22 @@ env.read_env()
 
 def main() -> None:
     server_config = ServerConfig(
-        host=env.str('FAISS_GRPC_HOST', '[::]'),
-        port=env.int("FAISS_GRPC_PORT", 50051),
-        max_workers=env.int("FAISS_GRPC_MAX_WORKERS", 10),
+        host=env.str('ANN_GRPC_HOST', '[::]'),
+        port=env.int("ANN_GRPC_PORT", 50051),
+        max_workers=env.int("ANN_GRPC_MAX_WORKERS", 10),
     )
     service_config = AnnServiceConfig(
-        normalize_query=env.bool("FAISS_GRPC_NORMALIZE_QUERY", False),
+        normalize_query=env.bool("ANN_GRPC_NORMALIZE_QUERY", False),
     )
 
-    index_kwargs = {'nprobe': env.int("FAISS_GRPC_NPROBE", None)}
+    index_kwargs = {
+        'nprobe': env.int("ANN_GRPC_FAISS_NPROBE", None),
+        'dimension': env.int("ANN_GRPC_ANNOY_DIMENSION", None),
+        'metric': env.str("ANN_GRPC_ANNOY_METRIC", None),
+    }
 
     server = Server(
-        env.str("FAISS_GRPC_INDEX_PATH"),
+        env.str("ANN_GRPC_INDEX_PATH"),
         server_config,
         service_config,
         **index_kwargs

@@ -140,5 +140,6 @@ cython_debug/
 # Pycharm
 .idea/
 
-# Sample index
+# Sample indexes
 examples/index.faiss
+examples/index.ann
