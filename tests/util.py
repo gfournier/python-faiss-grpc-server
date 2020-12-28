@@ -23,7 +23,9 @@ def create_faiss_index(dim, db_size, n_list):
 
 def create_annoy_index(dim, db_size, n_trees, metric):
     # https://github.com/spotify/annoy
-    index = AnnoyIndex(dim, metric)  # Length of item vector that will be indexed
+    index = AnnoyIndex(
+        dim, metric
+    )  # Length of item vector that will be indexed
     for i in range(db_size):
         v = [random.gauss(0, 1) for _ in range(dim)]
         index.add_item(i, v)

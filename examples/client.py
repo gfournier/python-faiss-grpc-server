@@ -89,7 +89,9 @@ def run() -> None:
     if hasattr(args, 'handler'):
         args.handler(args)
     else:
-        print('subcommand is required one of {heartbeat, search, search-by-id}')
+        print(
+            'subcommand is required one of {heartbeat, search, search-by-id}'
+        )
 
 
 if __name__ == "__main__":

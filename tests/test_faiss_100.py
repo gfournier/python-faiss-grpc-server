@@ -9,8 +9,7 @@ from tests.util import create_faiss_index
 @pytest.fixture(scope='module')
 def index():
     return FaissIndexWrapper.from_index(
-        create_faiss_index(200, 100000, 100),
-        **{'nprobe': 10}
+        create_faiss_index(200, 100000, 100), **{'nprobe': 10}
     )
 
 
@@ -26,6 +25,8 @@ def test_successful_search(grpc_sub_and_index):
     request = SearchRequest(query=vector, k=k)
     response = grpc_stub.search(request)
     expected_distances, expected_ids = index.search(val, k)
-    distances, ids = zip(*list(map(lambda x: (x.score, x.id), response.neighbors)))
+    distances, ids = zip(
+        *list(map(lambda x: (x.score, x.id), response.neighbors))
+    )
     assert np.array_equal(expected_ids, ids)
     assert np.array_equal(expected_distances, distances)

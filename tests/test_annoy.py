@@ -10,8 +10,7 @@ from tests.util import create_annoy_index
 def index():
     dim = 200
     return AnnoyIndexWrapper.from_index(
-        create_annoy_index(dim, 1000, 10, 'angular'),
-        **{'dimension': dim}
+        create_annoy_index(dim, 1000, 10, 'angular'), **{'dimension': dim}
     )
 
 
@@ -24,6 +23,8 @@ def test_successful_search(grpc_sub_and_index):
     request = SearchRequest(query=vector, k=k)
     response = grpc_stub.search(request)
     expected_distances, expected_ids = index.search(val, k)
-    distances, ids = zip(*list(map(lambda x: (x.score, x.id), response.neighbors)))
+    distances, ids = zip(
+        *list(map(lambda x: (x.score, x.id), response.neighbors))
+    )
     assert np.array_equal(expected_ids, ids)
     assert np.array_equal(expected_distances, distances)

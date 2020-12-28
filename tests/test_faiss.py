@@ -6,15 +6,19 @@ import pytest
 from google.protobuf.empty_pb2 import Empty
 
 from ann_grpc.indexes.faiss_index import FaissIndexWrapper
-from ann_grpc.proto.ann_pb2 import HeartbeatResponse, Vector, SearchRequest, SearchByIdRequest
+from ann_grpc.proto.ann_pb2 import (
+    HeartbeatResponse,
+    Vector,
+    SearchRequest,
+    SearchByIdRequest,
+)
 from tests.util import create_faiss_index
 
 
 @pytest.fixture(scope='module')
 def index():
     return FaissIndexWrapper.from_index(
-        create_faiss_index(64, 100000, 100),
-        **{'nprobe': 10}
+        create_faiss_index(64, 100000, 100), **{'nprobe': 10}
     )
 
 
@@ -36,7 +40,9 @@ def test_successful_search(grpc_sub_and_index):
     request = SearchRequest(query=vector, k=k)
     response = grpc_stub.search(request)
     expected_distances, expected_ids = index.search(val, k)
-    distances, ids = zip(*list(map(lambda x: (x.score, x.id), response.neighbors)))
+    distances, ids = zip(
+        *list(map(lambda x: (x.score, x.id), response.neighbors))
+    )
     assert np.array_equal(expected_ids, ids)
     assert np.array_equal(expected_distances, distances)
 
@@ -53,7 +59,9 @@ def test_failed_different_nprobe_search(grpc_sub_and_index):
     index.index = faiss.clone_index(index.index)
     index.index.nprobe = 1
     expected_distances, expected_ids = index.search(val, k)
-    distances, ids = zip(*list(map(lambda x: (x.score, x.id), response.neighbors)))
+    distances, ids = zip(
+        *list(map(lambda x: (x.score, x.id), response.neighbors))
+    )
     assert len(distances) == k
     assert len(ids) == k
     assert not np.array_equal(expected_ids, ids)
@@ -71,8 +79,11 @@ def test_failed_illegal_query_dimension_search(grpc_sub_and_index):
         grpc_stub.search(request)
         raise Exception("Search request should have failed.")
     except grpc.RpcError as e:
-        assert e.details()\
-               == f"query vector dimension mismatch expected {index.dimension} but passed {index.dimension * 2}"
+        assert (
+            e.details()
+            == f"query vector dimension mismatch expected {index.dimension} "
+            f"but passed {index.dimension * 2}"
+        )
 
 
 def test_successful_search_by_id(grpc_sub_and_index):
@@ -85,7 +96,9 @@ def test_successful_search_by_id(grpc_sub_and_index):
 
     query = index.index.reconstruct_n(request_id, 1)
     expected_distances, expected_ids = index.search(query, k + 1)
-    distances, ids = zip(*list(map(lambda x: (x.score, x.id), response.neighbors)))
+    distances, ids = zip(
+        *list(map(lambda x: (x.score, x.id), response.neighbors))
+    )
     assert np.array_equal(expected_ids[1:], ids)
     assert np.array_equal(expected_distances[1:], distances)
 
@@ -100,4 +113,6 @@ def test_failed_unknown_id_search_by_id(grpc_sub_and_index):
         grpc_stub.search_by_id(request)
         raise Exception("Search request should have failed.")
     except grpc.RpcError as e:
-        assert e.details() == f"request id must be 0 <= id <= {index.maximum_id}"
+        assert (
+            e.details() == f"request id must be 0 <= id <= {index.maximum_id}"
+        )
