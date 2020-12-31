@@ -2,16 +2,15 @@ import faiss
 import grpc
 import numpy as np
 import pytest
-
-from google.protobuf.empty_pb2 import Empty
-
 from ann_grpc.indexes.faiss_index import FaissIndexWrapper
 from ann_grpc.proto.ann_pb2 import (
     HeartbeatResponse,
-    Vector,
-    SearchRequest,
     SearchByIdRequest,
+    SearchRequest,
+    Vector,
 )
+from google.protobuf.empty_pb2 import Empty
+
 from tests.util import create_faiss_index
 
 

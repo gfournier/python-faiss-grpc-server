@@ -1,11 +1,9 @@
 import random
 
-import numpy as np
-
 import faiss
-from faiss import Index
-
+import numpy as np
 from annoy import AnnoyIndex
+from faiss import Index
 
 
 def create_faiss_index(dim: int, n_samples: int, n_list: int) -> Index:

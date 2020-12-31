@@ -1,9 +1,8 @@
 import pytest
-
 from ann_grpc.ann_server import AnnServiceConfig, AnnServiceServicerImpl
 from ann_grpc.proto.ann_pb2_grpc import (
-    add_AnnServiceServicer_to_server,
     AnnServiceStub,
+    add_AnnServiceServicer_to_server,
 )
 
 

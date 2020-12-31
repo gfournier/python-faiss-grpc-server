@@ -1,8 +1,8 @@
 import random
 
-from annoy import AnnoyIndex
 import faiss
 import numpy as np
+from annoy import AnnoyIndex
 
 
 def create_faiss_index(dim, db_size, n_list):

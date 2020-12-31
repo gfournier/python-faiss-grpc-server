@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
-
 from ann_grpc.indexes.annoy_index import AnnoyIndexWrapper
-from ann_grpc.proto.ann_pb2 import Vector, SearchRequest
+from ann_grpc.proto.ann_pb2 import SearchRequest, Vector
+
 from tests.util import create_annoy_index
 
 
