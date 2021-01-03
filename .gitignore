@@ -136,3 +136,13 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Pycharm
+.idea/
+
+# Sample indexes
+examples/index.faiss
+examples/index.ann
+tests/index.ann
+tests/index.faiss
+tests/index.json
