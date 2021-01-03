@@ -13,18 +13,25 @@ class AnnoyIndexWrapper(IndexWrapper):
 
     @staticmethod
     def load_index(filename, **kwargs):
+        print("Load annoy index")
         if 'dimension' not in kwargs:
             raise ValueError("'dimension' size of vectors must be specified.")
         if 'metric' not in kwargs:
             raise ValueError(
                 "'metric' for distance computation must be specified."
             )
+        print(f"Set 'dimension' to {kwargs.get('dimension')}")
+        print(f"Set 'metric' to {kwargs.get('metric')}")
         index = AnnoyIndex(kwargs.get('dimension'), kwargs.get('metric'))
         index.load(filename)
-        return AnnoyIndexWrapper.from_index(index)
+        return AnnoyIndexWrapper.from_index(index, **kwargs)
 
     @staticmethod
     def from_index(index: AnnoyIndex, **kwargs):
+        print("Load annoy index")
+        if 'dimension' not in kwargs:
+            raise ValueError("'dimension' size of vectors must be specified.")
+        print(f"Set 'dimension' to {kwargs.get('dimension')}")
         return AnnoyIndexWrapper(index, kwargs.get('dimension'))
 
     @property

@@ -6,7 +6,7 @@ env = Env()
 env.read_env()
 
 
-def main() -> None:
+def create_server() -> Server:
     server_config = ServerConfig(
         host=env.str('ANN_GRPC_HOST', '[::]'),
         port=env.int("ANN_GRPC_PORT", 50051),
@@ -21,6 +21,12 @@ def main() -> None:
         'dimension': env.int("ANN_GRPC_ANNOY_DIMENSION", None),
         'metric': env.str("ANN_GRPC_ANNOY_METRIC", None),
     }
+    if index_kwargs['nprobe'] is None:
+        del index_kwargs['nprobe']
+    if index_kwargs['dimension'] is None:
+        del index_kwargs['dimension']
+    if index_kwargs['metric'] is None:
+        del index_kwargs['metric']
 
     server = Server(
         env.str("ANN_GRPC_INDEX_PATH"),
@@ -28,6 +34,11 @@ def main() -> None:
         service_config,
         **index_kwargs
     )
+    return server
+
+
+def main() -> None:
+    server = create_server()
     server.serve()
 
 

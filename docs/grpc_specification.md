@@ -66,6 +66,7 @@ Request for searching by ID.
 | ----- | ---- | ----- | ----------- |
 | id | [uint64](#uint64) |  | The ID for searching. |
 | k | [uint64](#uint64) |  | How many results (neighbors) you want to get. |
+| name | [string](#string) |  | Index name for searching. This field is optional. |
 
 
 
@@ -98,6 +99,7 @@ Request for searching by query vector.
 | ----- | ---- | ----- | ----------- |
 | query | [Vector](#ann.Vector) |  | The query vector for searching. Dimension must be same as subscribed vectors in index. |
 | k | [uint64](#uint64) |  | How many results (neighbors) you want to get. |
+| name | [string](#string) |  | Index name for searching. This field is optional. |
 
 
 

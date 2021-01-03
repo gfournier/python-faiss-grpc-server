@@ -93,8 +93,7 @@ def test_successful_search_by_id(grpc_sub_and_index):
     request = SearchByIdRequest(id=request_id, k=k)
     response = grpc_stub.search_by_id(request)
 
-    query = index.index.reconstruct_n(request_id, 1)
-    expected_distances, expected_ids = index.search(query, k + 1)
+    expected_distances, expected_ids = index.search_by_id(request_id, k + 1)
     distances, ids = zip(
         *list(map(lambda x: (x.score, x.id), response.neighbors))
     )

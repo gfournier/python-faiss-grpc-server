@@ -1,6 +1,6 @@
 from concurrent import futures
 from dataclasses import dataclass
-from typing import List, Optional
+from typing import List, Optional, Union, Dict
 
 import grpc
 import numpy as np
@@ -45,17 +45,44 @@ class FaissIndexConfig:
 
 
 class AnnServiceServicerImpl(AnnServiceServicer):
-    def __init__(self, index: IndexWrapper, config: AnnServiceConfig) -> None:
-        self.index = index
+    def __init__(
+        self,
+        index: Union[IndexWrapper, Dict[str, IndexWrapper]],
+        config: AnnServiceConfig,
+    ) -> None:
+        if isinstance(index, IndexWrapper):
+            self.index = {'default': index}
+        else:
+            assert isinstance(index, dict)
+            assert all(map(lambda x: isinstance(x, str), index.keys()))
+            assert all(
+                map(lambda x: isinstance(x, IndexWrapper), index.values())
+            )
+            self.index = index
         self.config = config
+
+    @staticmethod
+    def _get_index_name(name):
+        if name is None or name == '':
+            return 'default'
+        return name
 
     def search(self, request: SearchRequest, context) -> SearchResponse:
         query = request.query.val
-        if len(query) != self.index.dimension:
+        name = self._get_index_name(request.name)
+
+        if name not in self.index:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            msg = f"Unknown index name: '{name}'"
+            context.set_details(msg)
+            return SearchResponse()
+
+        if len(query) != self.index[name].dimension:
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             msg = (
                 'query vector dimension mismatch '
-                f'expected {self.index.dimension} but passed {len(query)}'
+                f'expected {self.index[name].dimension} '
+                f'but passed {len(query)}'
             )
             context.set_details(msg)
             return SearchResponse()
@@ -63,7 +90,7 @@ class AnnServiceServicerImpl(AnnServiceServicer):
         if self.config.normalize_query:
             query = self.normalize(query)
 
-        distances, ids = self.index.search(query, request.k)
+        distances, ids = self.index[name].search(query, request.k)
 
         neighbors: List[Neighbor] = []
         for d, i in zip(distances, ids):
@@ -75,15 +102,25 @@ class AnnServiceServicerImpl(AnnServiceServicer):
     def search_by_id(
         self, request: SearchByIdRequest, context
     ) -> SearchByIdResponse:
+        name = self._get_index_name(request.name)
+
+        if name not in self.index:
+            context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
+            msg = f"Unknown index name: '{name}'"
+            context.set_details(msg)
+            return SearchResponse()
+
         request_id = request.id
-        maximum_id = self.index.maximum_id
+        maximum_id = self.index[name].maximum_id
         if not (0 <= request_id <= maximum_id):
             context.set_code(grpc.StatusCode.INVALID_ARGUMENT)
             msg = f'request id must be 0 <= id <= {maximum_id}'
             context.set_details(msg)
             return SearchByIdResponse()
 
-        distances, ids = self.index.search_by_id(request_id, request.k)
+        distances, ids = self.index[name].search_by_id(
+            request_id, request.k + 1
+        )
 
         neighbors: List[Neighbor] = []
         for d, i in zip(distances, ids):
@@ -122,3 +159,6 @@ class Server:
     def serve(self) -> None:
         self.server.start()
         self.server.wait_for_termination()
+
+    def stop(self, grace=None) -> None:
+        self.server.stop(grace)

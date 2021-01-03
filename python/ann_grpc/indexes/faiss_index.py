@@ -14,11 +14,12 @@ class FaissIndexWrapper(IndexWrapper):
     @staticmethod
     def load_index(filename, **kwargs):
         index = faiss.read_index(filename)
-        return FaissIndexWrapper.from_index(index)
+        return FaissIndexWrapper.from_index(index, **kwargs)
 
     @staticmethod
     def from_index(index: Index, **kwargs):
         if 'nprobe' in kwargs.keys():
+            print(f"Set 'nprobe' to {kwargs.get('nprobe')}")
             index.nprobe = kwargs.get('nprobe')
         return FaissIndexWrapper(index)
 
@@ -41,5 +42,5 @@ class FaissIndexWrapper(IndexWrapper):
         self, request_id: int, k: int
     ) -> Tuple[np.ndarray, np.ndarray]:
         query = self.index.reconstruct_n(request_id, 1)
-        distances, ids = self.index.search(query, k + 1)
+        distances, ids = self.index.search(query, k)
         return distances[0], ids[0]

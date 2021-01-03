@@ -21,7 +21,7 @@ DESCRIPTOR = _descriptor.FileDescriptor(
     syntax='proto3',
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
-    serialized_pb=b'\n\tann.proto\x12\x03\x61nn\x1a\x1bgoogle/protobuf/empty.proto\"%\n\x08Neighbor\x12\n\n\x02id\x18\x01 \x01(\x04\x12\r\n\x05score\x18\x02 \x01(\x02\"\x15\n\x06Vector\x12\x0b\n\x03val\x18\x01 \x03(\x02\"6\n\rSearchRequest\x12\x1a\n\x05query\x18\x01 \x01(\x0b\x32\x0b.ann.Vector\x12\t\n\x01k\x18\x02 \x01(\x04\"2\n\x0eSearchResponse\x12 \n\tneighbors\x18\x01 \x03(\x0b\x32\r.ann.Neighbor\"*\n\x11SearchByIdRequest\x12\n\n\x02id\x18\x01 \x01(\x04\x12\t\n\x01k\x18\x02 \x01(\x04\"J\n\x12SearchByIdResponse\x12\x12\n\nrequest_id\x18\x01 \x01(\x04\x12 \n\tneighbors\x18\x02 \x03(\x0b\x32\r.ann.Neighbor\"$\n\x11HeartbeatResponse\x12\x0f\n\x07message\x18\x01 \x01(\t2\xbd\x01\n\nAnnService\x12;\n\theartbeat\x12\x16.google.protobuf.Empty\x1a\x16.ann.HeartbeatResponse\x12\x31\n\x06search\x12\x12.ann.SearchRequest\x1a\x13.ann.SearchResponse\x12?\n\x0csearch_by_id\x12\x16.ann.SearchByIdRequest\x1a\x17.ann.SearchByIdResponseb\x06proto3',
+    serialized_pb=b'\n\tann.proto\x12\x03\x61nn\x1a\x1bgoogle/protobuf/empty.proto\"%\n\x08Neighbor\x12\n\n\x02id\x18\x01 \x01(\x04\x12\r\n\x05score\x18\x02 \x01(\x02\"\x15\n\x06Vector\x12\x0b\n\x03val\x18\x01 \x03(\x02\"D\n\rSearchRequest\x12\x1a\n\x05query\x18\x01 \x01(\x0b\x32\x0b.ann.Vector\x12\t\n\x01k\x18\x02 \x01(\x04\x12\x0c\n\x04name\x18\x03 \x01(\t\"2\n\x0eSearchResponse\x12 \n\tneighbors\x18\x01 \x03(\x0b\x32\r.ann.Neighbor\"8\n\x11SearchByIdRequest\x12\n\n\x02id\x18\x01 \x01(\x04\x12\t\n\x01k\x18\x02 \x01(\x04\x12\x0c\n\x04name\x18\x03 \x01(\t\"J\n\x12SearchByIdResponse\x12\x12\n\nrequest_id\x18\x01 \x01(\x04\x12 \n\tneighbors\x18\x02 \x03(\x0b\x32\r.ann.Neighbor\"$\n\x11HeartbeatResponse\x12\x0f\n\x07message\x18\x01 \x01(\t2\xbd\x01\n\nAnnService\x12;\n\theartbeat\x12\x16.google.protobuf.Empty\x1a\x16.ann.HeartbeatResponse\x12\x31\n\x06search\x12\x12.ann.SearchRequest\x1a\x13.ann.SearchResponse\x12?\n\x0csearch_by_id\x12\x16.ann.SearchByIdRequest\x1a\x17.ann.SearchByIdResponseb\x06proto3',
     dependencies=[
         google_dot_protobuf_dot_empty__pb2.DESCRIPTOR,
     ],
@@ -175,6 +175,25 @@ _SEARCHREQUEST = _descriptor.Descriptor(
             file=DESCRIPTOR,
             create_key=_descriptor._internal_create_key,
         ),
+        _descriptor.FieldDescriptor(
+            name='name',
+            full_name='ann.SearchRequest.name',
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode('utf-8'),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
     ],
     extensions=[],
     nested_types=[],
@@ -185,7 +204,7 @@ _SEARCHREQUEST = _descriptor.Descriptor(
     extension_ranges=[],
     oneofs=[],
     serialized_start=109,
-    serialized_end=163,
+    serialized_end=177,
 )
 
 
@@ -225,8 +244,8 @@ _SEARCHRESPONSE = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=165,
-    serialized_end=215,
+    serialized_start=179,
+    serialized_end=229,
 )
 
 
@@ -276,6 +295,25 @@ _SEARCHBYIDREQUEST = _descriptor.Descriptor(
             file=DESCRIPTOR,
             create_key=_descriptor._internal_create_key,
         ),
+        _descriptor.FieldDescriptor(
+            name='name',
+            full_name='ann.SearchByIdRequest.name',
+            index=2,
+            number=3,
+            type=9,
+            cpp_type=9,
+            label=1,
+            has_default_value=False,
+            default_value=b"".decode('utf-8'),
+            message_type=None,
+            enum_type=None,
+            containing_type=None,
+            is_extension=False,
+            extension_scope=None,
+            serialized_options=None,
+            file=DESCRIPTOR,
+            create_key=_descriptor._internal_create_key,
+        ),
     ],
     extensions=[],
     nested_types=[],
@@ -285,8 +323,8 @@ _SEARCHBYIDREQUEST = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=217,
-    serialized_end=259,
+    serialized_start=231,
+    serialized_end=287,
 )
 
 
@@ -345,8 +383,8 @@ _SEARCHBYIDRESPONSE = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=261,
-    serialized_end=335,
+    serialized_start=289,
+    serialized_end=363,
 )
 
 
@@ -386,8 +424,8 @@ _HEARTBEATRESPONSE = _descriptor.Descriptor(
     syntax='proto3',
     extension_ranges=[],
     oneofs=[],
-    serialized_start=337,
-    serialized_end=373,
+    serialized_start=365,
+    serialized_end=401,
 )
 
 _SEARCHREQUEST.fields_by_name['query'].message_type = _VECTOR
@@ -487,8 +525,8 @@ _ANNSERVICE = _descriptor.ServiceDescriptor(
     index=0,
     serialized_options=None,
     create_key=_descriptor._internal_create_key,
-    serialized_start=376,
-    serialized_end=565,
+    serialized_start=404,
+    serialized_end=593,
     methods=[
         _descriptor.MethodDescriptor(
             name='heartbeat',

@@ -25,6 +25,8 @@ message SearchRequest {
     Vector query = 1;
     // How many results (neighbors) you want to get.
     uint64 k = 2;
+    // Index name for searching. This field is optional.
+    string name = 3;
 }
 
 // Response of searching by query vector.
@@ -39,6 +41,8 @@ message SearchByIdRequest {
     uint64 id = 1;
     // How many results (neighbors) you want to get.
     uint64 k = 2;
+    // Index name for searching. This field is optional.
+    string name = 3;
 }
 
 // Response of searching by ID.
